@@ -1,0 +1,22 @@
+{
+  "name": "ahexo",
+  "version": "1.0.0",
+  "description": "a hexo editor by electron",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": "https://github.com/anshily/ahexo",
+  "keywords": [
+    "Electron",
+    "quick",
+    "start",
+    "tutorial",
+    "demo"
+  ],
+  "author": "anshily",
+  "license": "CC0-1.0",
+  "devDependencies": {
+    "electron": "^3.0.7"
+  }
+}

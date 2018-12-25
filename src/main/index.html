@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>hexo-editor</title>
+    <link rel="stylesheet" href="assets/editor_md/css/editormd.css" />
+    <link rel="stylesheet" href="assets/photon-0.1.2-dist/css/photon.min.css">
+    <!--<script type="text/javascript" src="resource/editor_md/lib/jquery.min.js"></script>-->
+    <script src="assets/editor_md/examples/js/zepto.min.js"></script>
+    <script src="assets/editor_md/src/editormd.js"></script>
+
+    <!--<script src="resource/editor_md/lib/marked.min.js"></script>-->
+    <!--<script src="resource/editor_md/lib/prettify.min.js"></script>-->
+    <!--<script src="resource/editor_md/lib/raphael.min.js"></script>-->
+    <!--<script src="resource/editor_md/lib/underscore.min.js"></script>-->
+    <!--<script src="resource/editor_md/lib/sequence-diagram.min.js"></script>-->
+    <!--<script src="resource/editor_md/lib/flowchart.min.js"></script>-->
+    <!--<script src="resource/editor_md/editormd.min.js"></script>-->
+
+
+  </head>
+  <body>
+  <div class="window">
+    <!--<header class="toolbar toolbar-header">-->
+      <!--<h1 class="title">Photon</h1>-->
+    <!--</header>-->
+    <header class="toolbar toolbar-header">
+      <!--<h1 class="title">Header with actions</h1>-->
+
+      <div class="toolbar-actions">
+        <div class="btn-group">
+          <button class="btn btn-default" onclick="selectDir()">
+            <span class="icon icon-home"></span>
+            选择项目
+          </button>
+          <button class="btn btn-default" id="scriptRunner">
+            <span class="icon icon-folder"></span>
+            爬取数据1
+          </button>
+          <button class="btn btn-default active" id="runnerSp">
+            <span class="icon icon-cloud"></span>
+            爬取数据2
+          </button>
+          <button class="btn btn-default" onclick="saveMD()">
+            <span class="icon icon-popup"></span>
+            保存
+          </button>
+          <button class="btn btn-default" onclick="selectTemplate()">
+            <span class="icon icon-shuffle"></span>
+            选择模板
+          </button>
+          <button class="btn btn-default" onclick="getHtml()">获取HTML</button>
+          <button class="btn btn-default" onclick="getMD()">获取MD</button>
+        </div>
+
+        <button class="btn btn-default">
+          <span class="icon icon-home icon-text"></span>
+          Filters
+        </button>
+
+        <button class="btn btn-default btn-dropdown pull-right">
+          <span class="icon icon-megaphone"></span>
+        </button>
+      </div>
+    </header>
+    <div class="window-content">
+
+      <div class="pane-group">
+        <div class="pane pane-sm sidebar">
+          <nav class="nav-group" id="fileList">
+
+            <div class="nav-group-item">
+              <div class="btn-dropdown">
+                <span class="icon icon-folder"></span>
+                fold
+              </div>
+            </div>
+
+          </nav>
+        </div>
+        <div class="pane">
+          <div id="test-editormd">
+            <textarea></textarea>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  </body>
+</html>
+
+<script>
+
+
+</script>
+<script>
+
+    require('./renderer.js');
+    const {dialog} = require('electron').remote;
+    const fs = require('fs');
+    const exec = require('child_process').exec;
+    const child_process = require('child_process');
+
+    var jQuery = Zepto;
+
+    var testEditor;
+
+    $(function() {
+
+        $.get('assets/template.md', function(md){
+            testEditor = editormd("test-editormd", {
+                width: "100%",
+                height: 480,
+                path : 'assets/editor_md/lib/',
+                toolbarIcons : function() {
+                    // Or return editormd.toolbarModes[name]; // full, simple, mini
+                    // Using "||" set icons align right.
+                    return ["undo", "redo", "|",
+                        "bold", "del", "italic", "quote", "ucwords", "uppercase", "lowercase", "|",
+                        "h1", "h2", "h3", "h4", "h5", "h6", "|",
+                        "list-ul", "list-ol", "hr", "|",
+                        "link", "reference-link", "code", "preformatted-text", "table", "pagebreak", "|",
+                        "goto-line", "watch", "preview", "fullscreen", "clear", "search"]
+                },
+                theme : "dark",
+                previewTheme : "dark",
+                editorTheme : "pastel-on-dark",
+                markdown : md,
+                codeFold : true,
+                //syncScrolling : false,
+                saveHTMLToTextarea : true,    // 保存 HTML 到 Textarea
+                searchReplace : true,
+                //watch : false,                // 关闭实时预览
+                htmlDecode : "style,script,iframe|on*",            // 开启 HTML 标签解析，为了安全性，默认不开启
+                //toolbar  : false,             //关闭工具栏
+                //previewCodeHighlight : false, // 关闭预览 HTML 的代码块高亮，默认开启
+                // emoji : true,
+                taskList : true,
+                tocm            : true,         // Using [TOCM]
+                // tex : true,                   // 开启科学公式TeX语言支持，默认关闭
+                // flowChart : true,             // 开启流程图支持，默认关闭
+                // sequenceDiagram : true,       // 开启时序/序列图支持，默认关闭,
+                //dialogLockScreen : false,   // 设置弹出层对话框不锁屏，全局通用，默认为true
+                //dialogShowMask : false,     // 设置弹出层对话框显示透明遮罩层，全局通用，默认为true
+                //dialogDraggable : false,    // 设置弹出层对话框不可拖动，全局通用，默认为true
+                //dialogMaskOpacity : 0.4,    // 设置透明遮罩层的透明度，全局通用，默认值为0.1
+                //dialogMaskBgColor : "#000", // 设置透明遮罩层的背景颜色，全局通用，默认为#fff
+                // imageUpload : true,
+                // imageFormats : ["jpg", "jpeg", "gif", "png", "bmp", "webp"],
+                // imageUploadURL : "./php/upload.php",
+                onload : function() {
+                    console.log('onload', this);
+                    // this.fullscreen();
+                    //this.unwatch();
+                    //this.watch().fullscreen();
+
+                },
+            });
+        });
+
+
+        $("#scriptRunner").click(function () {
+
+            console.log('click')
+            exec('python3 /Users/anshi/Desktop/resource/anshi/hexo-blog/crawler/start.py',(err,stdout,stderr) => {
+
+                if(err) {
+                    console.log('get weather api error:'+stderr);
+                } else {
+
+                    // let data = JSON.parse(stdout);
+                    console.log(stdout);
+                }
+
+            })
+        })
+
+        $("#runnerSp").bind('click', () => {
+            let workerProcess = child_process.spawn('python3',['/Users/anshi/Desktop/resource/anshi/hexo-blog/crawler/start.py'])
+
+            workerProcess.stdout.on('data', function (data) {
+                console.log('stdout: ' + data);
+            });
+
+            workerProcess.stderr.on('data', function (data) {
+                console.log('stderr: ' + data);
+            });
+
+            workerProcess.on('close', function (code) {
+                console.log('子进程已退出，退出码 '+code);
+            });
+
+        })
+    });
+
+    function getHtml(){
+        console.log(testEditor.getHTML());
+        testEditor.setValue('ouuuuu')
+        // testEditor.setContent('tttttttt')
+    }
+
+    function getMD() {
+        console.log(testEditor.getMarkdown())
+    }
+    
+    function selectTemplate() {
+        dialog.showOpenDialog({
+            title: 'select'
+        }, filePaths => {
+            console.log(filePaths)
+
+            fs.readFile(filePaths[0], 'utf-8', function(err, data) {
+                if (err) {
+                    throw err;
+                }
+                console.log(data);
+                testEditor.setValue(data)
+            });
+        })
+    }
+    
+    function selectDir() {
+
+        dialog.showOpenDialog({
+            title: 'select',
+            properties: ['openDirectory']
+        }, filePaths => {
+            console.log(filePaths)
+
+            fs.readdir(filePaths[0],function(err, files){
+                if (err) {
+                    return console.error(err);
+                }
+                files.forEach( function (file){
+                    console.log( file );
+
+                    let totalPath = filePaths[0]+'/'+file;
+
+                    fs.stat(totalPath, function (err, stats) {
+                        console.log(stats.isFile());//true
+
+                        if (stats.isFile()){
+
+                            let pathFolder = $("<span></span>").addClass("icon icon-pencil");
+                            let pathClickable = $("<div></div>").addClass("btn-file").click(
+                                function () {
+
+                                    fs.readFile(totalPath, 'utf-8', function(err, data) {
+                                        if (err) {
+                                            throw err;
+                                        }
+                                        console.log(data);
+                                        testEditor.setValue(data)
+                                    });
+
+                                }
+                            ).append(pathFolder).append(file);
+
+                            let pathItem = $("<div></div>").addClass("nav-group-item").append(pathClickable);
+
+                            $("#fileList").append(pathItem);
+
+                        } else {
+
+                            let pathFolder = $("<span></span>").addClass("icon icon-folder");
+                            let pathClickable = $("<div></div>").addClass("btn-dropdown").click(
+                                function () {
+
+                                    // let totalPath = filePaths[0]+'/'+file;
+                                    // console.log(totalPath)
+                                    //
+                                    // fs.stat(totalPath, function (err, stats) {
+                                    //     console.log(stats.isFile());         //true
+                                    // })
+                                }
+                            ).append(pathFolder).append(file);
+
+                            let pathItem = $("<div></div>").addClass("nav-group-item").append(pathClickable);
+
+                            $("#fileList").append(pathItem);
+
+                        }
+                    })
+
+
+                });
+            });
+
+        })
+
+    }
+
+
+    function saveMD() {
+        dialog.showSaveDialog({title: 'hang'},res => {
+            console.log(res)
+            fs.writeFile(res, testEditor.getMarkdown(), function(err) {
+                if (err) {
+                    throw err;
+                }
+
+                console.log('Saved.');
+
+                // 写入成功后读取测试
+                fs.readFile(res, 'utf-8', function(err, data) {
+                    if (err) {
+                        throw err;
+                    }
+                    console.log(data);
+                });
+            });
+        })
+    }
+
+</script>
